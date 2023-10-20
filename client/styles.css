@@ -15,6 +15,29 @@ header form{
     height: fit-content;
 }
 
+#search{
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    width: 100%;
+    color: #000;
+    background-color: white;
+}
+
+#serach-form:hover{
+    color: #000;
+    filter: none;
+}
+
+#search:focus{
+    outline:invert(100%);
+    background-color: #000;
+    color: white;
+}
+#search::placeholder{
+    color: #000;
+}
+
 header input{
     background-color: transparent;
     color: white;
@@ -72,7 +95,7 @@ main .container ul{
     background-color: black;
 }
 
-a:hover, header form:hover{
+a:hover, header #signout:hover{
    color: #aeaeae;
    filter: invert(20%);
 }
@@ -194,4 +217,28 @@ p{
     background-color: rgb(0, 115, 0);
     color: white;
     border: 1px solid rgb(0, 115, 0);
+}
+
+.pagination{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0 0 0;
+}
+.pagination a{
+    padding: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: normal;
+    font-size: 25px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    align-self: center;
+    color: #000;
+    border-radius: 50%;
+    border: #000 2px solid;
+
 }

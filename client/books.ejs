@@ -13,10 +13,13 @@
                     <a href="/"><img src="/logo.png" alt="logo"></a>
                 <ul>
                     <% if(auth == true) { %>
+                        <form id="search-form" method="get" action="/booksearch">
+                            <input type="text" id="search" name="search" placeholder="Search" required>
+                        </form>
                         <li><a href="/">Home</a></li>
                         <li><a href="/addbook">Add a book</a></li>
                         <li>
-                            <form method="post" action="/signout" >
+                            <form method="post" action="/signout" id="signout">
                                 <input type="submit" value="Sign out"/>
                             </form>
                         </li>
@@ -33,7 +36,7 @@
             <ul>
                 <li><a href="#">Services</a></li>
                 <li><a href="#">About us</a></li>
-                <li><a href="/books">Books</a></li>
+                <li><a href="/books?page=1">Books</a></li>
                 <li><a href="#">Contact us</a></li>
             </ul>
             <div class="content">
@@ -69,9 +72,9 @@
 
                 <div class="books">
                 <% books.forEach(book => { %>
-                    <% if(endpoint == 'books') { %>
+                    <% if(endpoint == 'books' || endpoint == 'booksearch') { %>
                         <a class="card" href="/books/<%= book._id %>">
-                    <% } else {%>
+                    <% } else{%>
                         <div class="book">
                     <% } %>
                     <h3><%= book.title %></h3>
@@ -89,16 +92,24 @@
                             </form>
                         </div>
                         <% } %>
-                    <% if(endpoint == 'books') { %>
+                    <% if(endpoint == 'books' || endpoint == 'booksearch') { %>
                         </a>
                     <% } else {%>
                         </div>
                     <% } %>
                 <% }) %>
+               
                 <%= error?.unexpected %>
                 <%= error?.get %>
                 </div>
                 <% } %>
+                <% if(endpoint == 'books' || endpoint == 'booksearch') { %>
+                    <div class="pagination">
+                    <% for(let i = 0; i < query?.pages; i++) { %>
+                        <a href="/<%= endpoint %>/?search=<%= query?.search %>&page=<%= i + 1 %>" class="page"><%= i + 1 %></a>
+                    <% } %>
+                    </div>
+                    <% } %>
             </div>
         </div>
 

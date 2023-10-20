@@ -98,13 +98,20 @@ routes.get("/books", middleware.isAuthenticated, async (req, res) => {
 		endpoint: "books",
 		error: error,
 		isBookOwner: false,
+		query: {},
 	};
 	try {
-		const books = await Book.find();
+		const { page = 1 } = req.query;
+		const limit = 8;
+		const books = await Book.find()
+			.limit(limit * 1)
+			.skip((page - 1) * limit);
 		if (!books) {
 			renderOptions.error = { get: "No books found" };
 			return res.status(404).render("books", renderOptions);
 		}
+		const count = await Book.countDocuments();
+		renderOptions.query = { pages: Math.ceil(count / limit) };
 		renderOptions.books = books;
 		res.status(200).render("books", renderOptions);
 	} catch (error) {
@@ -194,6 +201,53 @@ routes.get(
 	},
 );
 
+routes.get("/booksearch", middleware.isAuthenticated, async (req, res) => {
+	const renderOptions = {
+		auth: res.locals.isAuthenticated,
+		books: [],
+		endpoint: "booksearch",
+		error: res.locals.error,
+		isBookOwner: false,
+		query: {},
+	};
+	const { search, page = 1 } = req.query;
+	if (!search) {
+		renderOptions.error = { get: "No search query" };
+		return res.status(404).render("books", renderOptions);
+	}
+	const searchRegex = new RegExp(search, "i");
+	const limit = 8;
+	try {
+		const books = await Book.find({
+			$or: [
+				{ title: { $regex: searchRegex } },
+				{ author: { $regex: searchRegex } },
+			],
+		})
+			.skip((page - 1) * limit)
+			.limit(limit);
+		if (!books) {
+			renderOptions.error = { get: "No books found" };
+			return res.status(404).render("books", renderOptions);
+		}
+		const totalBooksCount = await Book.countDocuments({
+			$or: [
+				{ title: { $regex: searchRegex } },
+				{ author: { $regex: searchRegex } },
+			],
+		});
+		renderOptions.books = books;
+		renderOptions.query = {
+			search: search,
+			pages: Math.ceil(totalBooksCount / 8),
+		};
+		res.status(200).render("books", renderOptions);
+	} catch (error) {
+		renderOptions.error = { unexpected: error.message };
+		res.status(500).render("books", renderOptions);
+	}
+});
+
 routes.post("/addbook", middleware.authMiddleware, async (req, res) => {
 	const { title, author, published, pages, price } = req.body;
 	const renderOptions = {
@@ -236,7 +290,6 @@ routes.post(
 			isBookOwner: res.locals.isBookOwner,
 		};
 		try {
-			console.log(id, req.body, req.book);
 			const book = await Book.findByIdAndUpdate(
 				id,
 				{ title, author, published, pages, price },
